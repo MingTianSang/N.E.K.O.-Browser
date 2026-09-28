@@ -2639,6 +2639,14 @@
     if (!isEmbedPassthroughActive() || embedPointerLock !== null || !lastHostPointer) {
       return;
     }
+    if (panel?.dataset.embedProtocol === 'legacy') {
+      // The embedded adapter never completed the NEKO_EMBED handshake, so there
+      // are no interactive regions to hit-test against. Keep the frame fully
+      // interactive instead of letting every host pointer move clamp it to
+      // "false" — otherwise fullscreen becomes permanently unclickable.
+      setFrameInteractive(true, 'legacy-sticky');
+      return;
+    }
     const point = hostPointToEmbedPoint(lastHostPointer.x, lastHostPointer.y);
     const region = findEmbedRegionAtPoint(point.x, point.y);
     if (region?.kind === 'model-bounds' && (region.id === 'vrm-model' || region.id === 'mmd-model')) {

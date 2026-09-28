@@ -576,6 +576,18 @@ test('a missing or incompatible injected adapter falls back to an interactive if
   assert.match(block, /setFrameInteractive\(true, 'legacy-fallback'\)/);
 });
 
+test('the legacy fallback stays interactive even while the host pointer moves', () => {
+  const block = functionBlock('updateFrameInteractionFromLastPointer', 'setFrameInteractive');
+  const legacyIndex = block.indexOf("embedProtocol === 'legacy'");
+  const hitTestIndex = block.indexOf('findEmbedRegionAtPoint');
+  assert.notEqual(legacyIndex, -1, 'the legacy protocol must be checked before hit testing');
+  assert.ok(
+    legacyIndex < hitTestIndex,
+    'the legacy sticky guard must run before any region hit test can clamp interaction'
+  );
+  assert.match(block, /setFrameInteractive\(true, 'legacy-sticky'\)/);
+});
+
 test('messages are restricted to the current extension bridge frame and origin', () => {
   assert.match(source, /event\.source !== frame\.contentWindow/);
   assert.match(source, /event\.origin !== FRAME_BRIDGE_ORIGIN/);
